@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net48</TargetFramework>
+        <OutputType>Library</OutputType>
+        <RootNamespace>YqlossClientHarmony</RootNamespace>
+        <AssemblyName>YCHFX</AssemblyName>
+        <LangVersion>13</LangVersion>
+        <Nullable>enable</Nullable>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <EnableDefaultItems>false</EnableDefaultItems>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <!-- 精简版：把游戏 Managed 目录写死到本机实际位置。
+             两处坑（都踩过）：
+             1. %(FullPath) 与 $(MSBuildProjectDirectory)\... 是相对项目目录解析的，塞绝对路径会被
+                重复拼成 "项目目录 + D:\..." ⇒ 报 MSB4023。绝对路径只能出现在 $(GameRoot) 这一处。
+             2. **\*.dll 这种 glob 不支持带盘符的绝对路径 ⇒ 引用改为逐个列文件。 -->
+        <GameRoot>D:\softwell\steamapps\common\A Dance of Fire and Ice</GameRoot>
+        <GameManagedPath>$(GameRoot)\A Dance of Fire and Ice_Data\Managed</GameManagedPath>
+        <!-- compile against the BCL shipped with the game, which is what the mod actually runs on -->
+        <FrameworkPathOverride>$(GameManagedPath)</FrameworkPathOverride>
+        <EnableFrameworkPathOverride>false</EnableFrameworkPathOverride>
+        <AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages>
+        <AssemblySearchPaths>$(GameManagedPath);$(AssemblySearchPaths)</AssemblySearchPaths>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <DefineConstants>TRACE</DefineConstants>
+    </PropertyGroup>
+
+    <!-- 引用游戏 Managed 下的全部程序集（含 UnityModManager 子目录）。
+         用 ItemGroup 逐个列出来，不走 glob —— 绝对路径下的 ** 通配不可靠。 -->
+    <ItemGroup>
+        <GameDll Include="$(GameManagedPath)\*.dll" />
+        <GameDll Include="$(GameManagedPath)\UnityModManager\*.dll" />
+        <Reference Include="@(GameDll)">
+            <HintPath>%(GameDll.FullPath)</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="**\*.cs"
+                 Exclude="ADOFAIGame\**\*.cs;bin\**\*.cs;obj\**\*.cs"/>
+        <Content Include="Languages\**\*.lang;*.md"/>
+    </ItemGroup>
+</Project>

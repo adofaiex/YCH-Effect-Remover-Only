@@ -1,0 +1,10 @@
+{
+  "Id": "YCHFX",
+  "DisplayName": "YCH Effect Remover Only",
+  "Author": "Yqloss (GPLv2 derivative)",
+  "Version": "1.0.0",
+  "AssemblyName": "YCHFX.dll",
+  "EntryMethod": "YqlossClientHarmony.Main.Load",
+  "ManagerVersion": "0.32.5",
+  "HomePage": "https://ych.yqloss.net"
+}
